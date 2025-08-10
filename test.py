@@ -49,7 +49,10 @@ CREATE TABLE IF NOT EXISTS company_profile (
     address TEXT,
     avatar TEXT,
     about_me TEXT,
-    links TEXT,
+    fb_link TEXT,
+    instagram_link TEXT,
+    linkedin_link TEXT,
+    portfolio_link TEXT,
     created_at TIMESTAMP
 );
 """)
@@ -95,14 +98,15 @@ for profile in profiles_coll.find():
     cur.execute("SELECT user_id, name, address FROM users_access WHERE user_type = 'company' AND mongo_id = %s;", (company_mongo_id,))
     row = cur.fetchone()
 
-    
     if not row:
         print(f"Warning: No user found for company_id {company_mongo_id}")
         continue
 
-    cur.execute("""
-        INSERT INTO company_profile (user_id, name, address, avatar, about_me, links, created_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    links = profile.get('links', {})
+    cur.execute(
+        """
+        INSERT INTO company_profile (user_id, name, address, avatar, about_me, fb_link, instagram_link, linkedin_link, portfolio_link, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (user_id) DO NOTHING;
         """,
         (
@@ -111,10 +115,11 @@ for profile in profiles_coll.find():
             row[2],
             profile.get('avatar'),
             profile.get('about_me'),
-            "test",
-            # profile.get('links',),
-            # Json(profile.get('links', {})),
-            profile.get('created_at'),
+            links.get('facebook'),
+            links.get('linkedin'),
+            links.get('instagram'),
+            profile.get('portfolio'),
+            profile.get('created_at')
         )
     )
     pg.commit()
