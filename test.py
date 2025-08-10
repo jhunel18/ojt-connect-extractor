@@ -118,7 +118,7 @@ for profile in profiles_coll.find():
             links.get('facebook'),
             links.get('linkedin'),
             links.get('instagram'),
-            profile.get('portfolio'),
+            links.get('portfolio'),
             profile.get('created_at')
         )
     )
